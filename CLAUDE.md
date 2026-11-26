@@ -9,6 +9,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Ausnahme, vom Nutzer so entschieden: **Im Rechner werden Beträge ohne Cent angezeigt** (`91.129 €`, Formatter `eur` mit `maximumFractionDigits: 0`). Nicht auf Cent umstellen. Die Diagrammachse nutzt Kurzform (`75 Tsd. €`).
 - **Nach jeder fertigen Änderung einen Git-Commit machen** – mit einer kurzen deutschen Commit-Nachricht, die beschreibt, was sich für den Nutzer ändert.
 
+## Git-Arbeitsweise (PC und Handy)
+
+Der Nutzer arbeitet am PC und gelegentlich am Handy (Claude Code im Web/in der App). **GitHub (`origin`, https://github.com/sei-do/sparplan-rechner) ist der gemeinsame Stand.**
+
+1. **Zu Beginn jeder Sitzung `git pull`** auf `main`, damit Änderungen vom anderen Gerät da sind.
+2. **Änderungen auf einem Feature-Branch** (`feature/<kurzer-name>`), nicht direkt auf `main`.
+3. **Jeden Commit sofort pushen**, auch auf dem Feature-Branch (`git push -u origin <branch>` beim ersten Mal).
+4. **In `main` mergen erst nach ausdrücklicher Freigabe durch den Nutzer**, danach `main` sofort pushen. Den gemergten Feature-Branch lokal und auf GitHub löschen.
+5. Verworfene Änderungen: Feature-Branch lokal und auf GitHub löschen; `main` bleibt unberührt.
+6. **Historie, die auf GitHub liegt, nicht umschreiben** (kein `rebase`/`amend`/`filter-branch` auf gepushten Commits, kein Force-Push). Rückgängig machen per `git revert`.
+
+Am Handy arbeitet Claude in der Cloud direkt auf GitHub; dort entstehen Änderungen als Branch bzw. Pull Request, den der Nutzer auf GitHub mergt.
+
 ## Projekt
 
 Sparplan-Rechner als **eine einzige Datei `index.html`** (HTML + CSS + JavaScript inline). Kein Build, keine Abhängigkeiten, keine Tests. Die Seite muss **ohne Internet** funktionieren: keine CDNs, externen Schriften oder Bibliotheken einbinden – das Diagramm ist handgeschriebenes SVG.
