@@ -13,8 +13,11 @@
     --line: #e5e7eb;
     --accent: #2563eb;
     --accent-soft: rgba(37, 99, 235, 0.12);
+    --b: #ea580c;
+    --b-soft: rgba(234, 88, 12, 0.12);
     --paid: #9ca3af;
     --gain: #16a34a;
+    --neg: #dc2626;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -25,8 +28,11 @@
       --line: #2c313b;
       --accent: #60a5fa;
       --accent-soft: rgba(96, 165, 250, 0.15);
+      --b: #fb923c;
+      --b-soft: rgba(251, 146, 60, 0.15);
       --paid: #6b7280;
       --gain: #4ade80;
+      --neg: #f87171;
     }
   }
   * { box-sizing: border-box; }
@@ -47,11 +53,29 @@
     padding: 22px;
     margin-bottom: 20px;
   }
+
+  /* Schalter */
+  .switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font-size: 0.95rem; }
+  .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .switch .track { width: 40px; height: 22px; border-radius: 11px; background: var(--line); position: relative; transition: background .15s; flex: none; }
+  .switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .switch input:checked + .track { background: var(--accent); }
+  .switch input:checked + .track::after { transform: translateX(18px); }
+  .switch input:focus-visible + .track { box-shadow: 0 0 0 3px var(--accent-soft); }
+  .toggle-row { margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+
+  /* Pläne + Eingaben */
+  .plans { display: grid; gap: 28px; }
+  .compare .plans { grid-template-columns: 1fr 1fr; }
+  .plan-title { display: none; font-size: 0.95rem; margin: 0 0 12px; align-items: center; gap: 8px; }
+  .plan-title::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+  .compare .plan-title { display: flex; }
   .inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .compare .inputs { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   @media (max-width: 860px) { .inputs { grid-template-columns: repeat(2, 1fr); } }
   label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
   .field { position: relative; }
-  input {
+  input[type="number"] {
     width: 100%;
     font: inherit;
     font-size: 1.1rem;
@@ -63,19 +87,32 @@
     outline: none;
     transition: border-color .15s, box-shadow .15s;
   }
-  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  input[type="number"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+
+  /* Ergebnisse */
   .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .stat .k { font-size: 0.85rem; color: var(--muted); }
   .stat .v { font-size: 1.6rem; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
   .stat.main .v { color: var(--accent); }
   .stat.gain .v { color: var(--gain); }
+  .cmp { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); font-variant-numeric: tabular-nums; }
+  .cmp > div { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: right; }
+  .cmp > div:nth-child(4n+1) { text-align: left; padding-left: 0; }
+  .cmp .h { font-size: 0.85rem; color: var(--muted); }
+  .cmp .name { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .cmp .name::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+  .cmp .val { font-size: 1.25rem; font-weight: 650; }
+  .cmp .last { border-bottom: none; }
+  .pos { color: var(--gain); }
+  .neg { color: var(--neg); }
+
+  /* Diagramm */
   .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
   .chart-head h2 { font-size: 1rem; margin: 0; }
-  .legend { display: flex; gap: 16px; font-size: 0.85rem; color: var(--muted); }
-  .legend span::before { content: ""; display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
-  .legend .l-total::before { background: var(--accent); }
-  .legend .l-paid::before { background: var(--paid); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--muted); }
+  .legend span::before { content: ""; display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; background: var(--c); }
+  .legend span.dash::before { background: repeating-linear-gradient(90deg, var(--c) 0 4px, transparent 4px 7px); }
   .chart-wrap { position: relative; }
   svg { width: 100%; height: auto; display: block; }
   svg text { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
@@ -87,7 +124,11 @@
     font-variant-numeric: tabular-nums;
   }
   .tip b { display: block; margin-bottom: 2px; }
+  .tip .grp { margin-top: 4px; }
+  .tip .grp i { font-style: normal; font-weight: 600; color: var(--c); }
   .note { color: var(--muted); font-size: 0.8rem; margin-top: 8px; }
+
+  /* Tabelle */
   .table-wrap { max-height: 420px; overflow-y: auto; margin-top: 10px; border-top: 1px solid var(--line); }
   table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
   th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--line); }
@@ -95,9 +136,19 @@
   thead th { position: sticky; top: 0; background: var(--card); color: var(--muted); font-weight: 600; font-size: 0.85rem; }
   tbody tr:hover { background: var(--accent-soft); }
   td.gain { color: var(--gain); }
-  .error { color: #dc2626; font-size: 0.9rem; margin-top: 12px; display: none; }
+  .error { color: var(--neg); font-size: 0.9rem; margin-top: 12px; display: none; }
+
   @media (max-width: 640px) {
-    .inputs, .results { grid-template-columns: 1fr; }
+    .inputs, .compare .inputs, .results, .compare .plans { grid-template-columns: 1fr; }
+    main { padding: 24px 12px 40px; }
+    .card { padding: 18px 14px; }
+    .cmp { grid-template-columns: minmax(0, 5.2em) repeat(3, minmax(0, 1fr)); column-gap: 6px; }
+    .cmp > div { padding: 8px 0; }
+    .cmp .val { white-space: nowrap; }
+    .cmp .name { font-size: 0.85rem; gap: 5px; line-height: 1.25; }
+    .cmp .h { font-size: 0.75rem; }
+    .cmp .val { font-size: 0.85rem; }
+    th, td { padding: 8px 6px; font-size: 0.85rem; }
   }
 </style>
 </head>
@@ -107,39 +158,22 @@
   <p class="sub">Wie viel wird aus deiner monatlichen Sparrate?</p>
 
   <section class="card">
-    <div class="inputs">
-      <div>
-        <label for="start">Startkapital</label>
-        <div class="field"><input id="start" type="number" min="0" step="100" value="0" inputmode="decimal"><span class="unit">€</span></div>
-      </div>
-      <div>
-        <label for="rate">Monatliche Sparrate</label>
-        <div class="field"><input id="rate" type="number" min="0" step="10" value="200" inputmode="decimal"><span class="unit">€</span></div>
-      </div>
-      <div>
-        <label for="years">Laufzeit</label>
-        <div class="field"><input id="years" type="number" min="1" max="100" step="1" value="20" inputmode="numeric"><span class="unit">J.</span></div>
-      </div>
-      <div>
-        <label for="ret">Erwartete jährliche Rendite</label>
-        <div class="field"><input id="ret" type="number" min="-50" max="50" step="0.1" value="6" inputmode="decimal"><span class="unit">%</span></div>
-      </div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="compare"><span class="track"></span>Zweiten Plan vergleichen</label>
     </div>
-    <div class="error" id="error">Bitte gültige Werte eingeben (Laufzeit 1–100 Jahre).</div>
+    <div class="plans">
+      <div class="plan" id="plan-a"></div>
+      <div class="plan" id="plan-b" hidden></div>
+    </div>
+    <div class="error" id="error"></div>
   </section>
 
-  <section class="card">
-    <div class="results">
-      <div class="stat main"><div class="k">Endbetrag</div><div class="v" id="outTotal">–</div></div>
-      <div class="stat"><div class="k">Eingezahlte Summe</div><div class="v" id="outPaid">–</div></div>
-      <div class="stat gain"><div class="k">Gewinn</div><div class="v" id="outGain">–</div></div>
-    </div>
-  </section>
+  <section class="card" id="results"></section>
 
   <section class="card">
     <div class="chart-head">
       <h2>Entwicklung über die Jahre</h2>
-      <div class="legend"><span class="l-total">Depotwert</span><span class="l-paid">Eingezahlt</span></div>
+      <div class="legend" id="legend"></div>
     </div>
     <div class="chart-wrap">
       <svg id="chart" viewBox="0 0 800 340" role="img" aria-label="Liniendiagramm der Sparplan-Entwicklung"></svg>
@@ -152,7 +186,7 @@
     <h2 style="font-size:1rem;margin:0">Werte pro Jahr</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Jahr</th><th>Eingezahlt</th><th>Gewinn</th><th>Depotwert</th></tr></thead>
+        <thead id="thead"></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -162,6 +196,8 @@
 <script>
   const $ = id => document.getElementById(id);
   const eur = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const eurSigned = v => (v > 0 ? "+" : v < 0 ? "−" : "") + eur.format(Math.abs(v));
+  const signCls = v => v > 0 ? "pos" : v < 0 ? "neg" : "";
   const eurShort = v => {
     const a = Math.abs(v);
     if (a >= 1e6) return (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " Mio. €";
@@ -169,6 +205,40 @@
     return Math.round(v) + " €";
   };
 
+  // ---------- Eingaben ----------
+  const FIELDS = [
+    { key: "start", label: "Startkapital",                 unit: "€",  attrs: 'min="0" step="100" inputmode="decimal"', def: 0 },
+    { key: "rate",  label: "Monatliche Sparrate",          unit: "€",  attrs: 'min="0" step="10" inputmode="decimal"', def: 200 },
+    { key: "years", label: "Laufzeit",                     unit: "J.", attrs: 'min="1" max="100" step="1" inputmode="numeric"', def: 20 },
+    { key: "ret",   label: "Erwartete jährliche Rendite",  unit: "%",  attrs: 'min="-50" max="50" step="0.1" inputmode="decimal"', def: 6 },
+  ];
+  const PLANS = {
+    a: { name: "Plan A", color: "--accent", soft: "--accent-soft" },
+    b: { name: "Plan B", color: "--b",      soft: "--b-soft" },
+  };
+
+  function renderPlanInputs(p) {
+    $("plan-" + p).innerHTML =
+      `<h3 class="plan-title" style="--c:var(${PLANS[p].color})">${PLANS[p].name}</h3><div class="inputs">` +
+      FIELDS.map(f => `<div><label for="${p}-${f.key}">${f.label}</label>
+        <div class="field"><input id="${p}-${f.key}" type="number" ${f.attrs} value="${f.def}"><span class="unit">${f.unit}</span></div></div>`).join("") +
+      `</div>`;
+    FIELDS.forEach(f => $(`${p}-${f.key}`).addEventListener("input", calc));
+  }
+
+  // Liest die vier Felder eines Plans; gibt null zurück, wenn etwas ungültig ist
+  function readPlan(p) {
+    const v = k => $(`${p}-${k}`).value;
+    const start = v("start") === "" ? 0 : parseFloat(v("start"));
+    const rate = parseFloat(v("rate"));
+    const years = parseInt(v("years"), 10);
+    const pct = parseFloat(v("ret"));
+    const ok = isFinite(start) && start >= 0 && isFinite(rate) && rate >= 0 &&
+               isFinite(years) && years >= 1 && years <= 100 && isFinite(pct) && pct > -100;
+    return ok ? { start, rate, years, pct } : null;
+  }
+
+  // ---------- Berechnung ----------
   function simulate(start, rate, years, pct) {
     const m = Math.pow(1 + pct / 100, 1 / 12) - 1; // Monatsrendite
     let total = start, paid = start; // Startkapital liegt ab Tag 1 im Depot
@@ -191,89 +261,194 @@
     return step * p;
   }
 
+  // series: [{ id: "a"|"b", rows }]
+  let series = [];
+  const isCompare = () => series.length > 1;
+  const maxYears = () => Math.max(...series.map(s => s.rows.length - 1));
+
+  // ---------- Ergebnis-Kacheln ----------
+  function renderResults() {
+    if (!isCompare()) {
+      const last = series[0].rows.at(-1);
+      $("results").innerHTML = `<div class="results">
+        <div class="stat main"><div class="k">Endbetrag</div><div class="v" id="outTotal">${eur.format(last.total)}</div></div>
+        <div class="stat"><div class="k">Eingezahlte Summe</div><div class="v" id="outPaid">${eur.format(last.paid)}</div></div>
+        <div class="stat gain"><div class="k">Gewinn</div><div class="v" id="outGain">${eur.format(last.total - last.paid)}</div></div>
+      </div>`;
+      return;
+    }
+    const [A, B] = series.map(s => s.rows.at(-1));
+    const row = (id, r) => `<div class="name" style="--c:var(${PLANS[id].color})">${PLANS[id].name}</div>
+      <div class="val">${eur.format(r.total)}</div><div class="val">${eur.format(r.paid)}</div><div class="val pos">${eur.format(r.total - r.paid)}</div>`;
+    const d = { total: B.total - A.total, paid: B.paid - A.paid, gain: (B.total - B.paid) - (A.total - A.paid) };
+    $("results").innerHTML = `<div class="cmp">
+      <div class="h"></div><div class="h">Endbetrag</div><div class="h">Eingezahlt</div><div class="h">Gewinn</div>
+      ${row("a", A)}${row("b", B)}
+      <div class="name last" style="--c:var(--muted)">Unterschied (B − A)</div>
+      <div class="val last ${signCls(d.total)}">${eurSigned(d.total)}</div>
+      <div class="val last">${eurSigned(d.paid)}</div>
+      <div class="val last ${signCls(d.gain)}">${eurSigned(d.gain)}</div>
+    </div>`;
+  }
+
+  // ---------- Diagramm ----------
   const W = 800, H = 340, P = { l: 78, r: 16, t: 14, b: 34 };
-  let rows = [];
+
+  function renderLegend() {
+    $("legend").innerHTML = isCompare()
+      ? `<span style="--c:var(--accent)">Plan A</span><span style="--c:var(--b)">Plan B</span>` +
+        `<span style="--c:var(--muted)">Depotwert</span><span class="dash" style="--c:var(--muted)">Eingezahlt</span>`
+      : `<span style="--c:var(--accent)">Depotwert</span><span class="dash" style="--c:var(--paid)">Eingezahlt</span>`;
+  }
 
   function draw() {
     const svg = $("chart");
-    const years = rows.length - 1;
-    const max = niceMax(Math.max(...rows.map(r => Math.max(r.total, r.paid))));
+    const years = maxYears();
+    const max = niceMax(Math.max(...series.flatMap(s => s.rows.map(r => Math.max(r.total, r.paid)))));
     const x = y => P.l + (y / years) * (W - P.l - P.r);
     const yy = v => H - P.b - (v / max) * (H - P.t - P.b);
     const css = getComputedStyle(document.documentElement);
     const c = n => css.getPropertyValue(n).trim();
 
     let s = "";
-    // Gitter + Y-Achse
     for (let i = 0; i <= 4; i++) {
       const v = max * i / 4, py = yy(v);
       s += `<line x1="${P.l}" x2="${W - P.r}" y1="${py}" y2="${py}" stroke="${c("--line")}" />`;
       s += `<text x="${P.l - 10}" y="${py + 4}" text-anchor="end">${eurShort(v)}</text>`;
     }
-    // X-Achse
     const step = Math.max(1, Math.ceil(years / 10));
     for (let yr = 0; yr <= years; yr += step) {
       s += `<text x="${x(yr)}" y="${H - 10}" text-anchor="middle">${yr}</text>`;
     }
-    const path = key => rows.map((r, i) => `${i ? "L" : "M"}${x(r.year).toFixed(1)},${yy(r[key]).toFixed(1)}`).join("");
-    const totalPath = path("total");
-    s += `<path d="${totalPath}L${x(years)},${yy(0)}L${x(0)},${yy(0)}Z" fill="${c("--accent-soft")}" />`;
-    s += `<path d="${path("paid")}" fill="none" stroke="${c("--paid")}" stroke-width="2" stroke-dasharray="5 4" />`;
-    s += `<path d="${totalPath}" fill="none" stroke="${c("--accent")}" stroke-width="2.5" stroke-linejoin="round" />`;
+    const path = (rows, key) => rows.map((r, i) => `${i ? "L" : "M"}${x(r.year).toFixed(1)},${yy(r[key]).toFixed(1)}`).join("");
+
+    // Fläche nur unter Plan A
+    const A = series[0].rows;
+    s += `<path d="${path(A, "total")}L${x(A.length - 1)},${yy(0)}L${x(0)},${yy(0)}Z" fill="${c("--accent-soft")}" />`;
+
+    series.forEach(({ id, rows }) => {
+      const col = c(PLANS[id].color);
+      const paidCol = isCompare() ? col : c("--paid");
+      s += `<path d="${path(rows, "paid")}" fill="none" stroke="${paidCol}" stroke-width="2" stroke-dasharray="5 4" ${isCompare() ? 'opacity="0.7"' : ""} />`;
+    });
+    series.forEach(({ id, rows }) => {
+      s += `<path d="${path(rows, "total")}" fill="none" stroke="${c(PLANS[id].color)}" stroke-width="2.5" stroke-linejoin="round" />`;
+    });
     s += `<line id="hover" y1="${P.t}" y2="${H - P.b}" stroke="${c("--muted")}" stroke-width="1" visibility="hidden" />`;
-    s += `<circle id="dot" r="5" fill="${c("--accent")}" stroke="${c("--card")}" stroke-width="2" visibility="hidden" />`;
+    series.forEach(({ id }) => {
+      s += `<circle class="dot" data-id="${id}" r="5" fill="${c(PLANS[id].color)}" stroke="${c("--card")}" stroke-width="2" visibility="hidden" />`;
+    });
     svg.innerHTML = s;
     svg._x = x; svg._y = yy;
   }
 
-  function calc() {
-    const rate = parseFloat($("rate").value);
-    const years = parseInt($("years").value, 10);
-    const pct = parseFloat($("ret").value);
-    const start = $("start").value === "" ? 0 : parseFloat($("start").value);
-    const ok = isFinite(start) && start >= 0 && isFinite(rate) && rate >= 0 && isFinite(years) && years >= 1 && years <= 100 && isFinite(pct) && pct > -100;
-    $("error").style.display = ok ? "none" : "block";
-    if (!ok) return;
-    rows = simulate(start, rate, years, pct);
-    const last = rows[rows.length - 1];
-    $("outTotal").textContent = eur.format(last.total);
-    $("outPaid").textContent = eur.format(last.paid);
-    $("outGain").textContent = eur.format(last.total - last.paid);
-    draw();
-    $("tbody").innerHTML = rows.slice(1).map(r =>
-      `<tr><td>${r.year}</td><td>${eur.format(r.paid)}</td><td class="gain">${eur.format(r.total - r.paid)}</td><td>${eur.format(r.total)}</td></tr>`
-    ).join("");
+  // ---------- Tabelle ----------
+  function renderTable() {
+    const years = maxYears();
+    if (!isCompare()) {
+      $("thead").innerHTML = `<tr><th>Jahr</th><th>Eingezahlt</th><th>Gewinn</th><th>Depotwert</th></tr>`;
+      $("tbody").innerHTML = series[0].rows.slice(1).map(r =>
+        `<tr><td>${r.year}</td><td>${eur.format(r.paid)}</td><td class="gain">${eur.format(r.total - r.paid)}</td><td>${eur.format(r.total)}</td></tr>`
+      ).join("");
+      return;
+    }
+    const [A, B] = series.map(s => s.rows);
+    $("thead").innerHTML = `<tr><th>Jahr</th><th>Depotwert A</th><th>Depotwert B</th><th>Differenz</th></tr>`;
+    let html = "";
+    for (let y = 1; y <= years; y++) {
+      const a = A[y], b = B[y];
+      const diff = a && b ? b.total - a.total : null;
+      html += `<tr><td>${y}</td><td>${a ? eur.format(a.total) : "–"}</td><td>${b ? eur.format(b.total) : "–"}</td>` +
+              `<td class="${diff === null ? "" : signCls(diff)}">${diff === null ? "–" : eurSigned(diff)}</td></tr>`;
+    }
+    $("tbody").innerHTML = html;
   }
 
-  // Tooltip
+  // ---------- Steuerung ----------
+  let bFilled = false;
+  function toggleCompare() {
+    const on = $("compare").checked;
+    if (on && !bFilled) {
+      FIELDS.forEach(f => $(`b-${f.key}`).value = $(`a-${f.key}`).value);
+      bFilled = true;
+    }
+    $("plan-b").hidden = !on;
+    document.body.classList.toggle("compare", on);
+    calc();
+  }
+
+  function calc() {
+    const on = $("compare").checked;
+    const ids = on ? ["a", "b"] : ["a"];
+    const plans = ids.map(readPlan);
+    const bad = ids.filter((id, i) => !plans[i]).map(id => PLANS[id].name);
+    $("error").textContent = bad.length
+      ? `Bitte gültige Werte eingeben${on ? " (" + bad.join(", ") + ")" : ""}: Laufzeit 1–100 Jahre, keine negativen Beträge.`
+      : "";
+    $("error").style.display = bad.length ? "block" : "none";
+    if (bad.length) return;
+    series = ids.map((id, i) => ({ id, rows: simulate(plans[i].start, plans[i].rate, plans[i].years, plans[i].pct) }));
+    renderResults();
+    renderLegend();
+    draw();
+    renderTable();
+  }
+
+  // ---------- Tooltip ----------
   const svg = $("chart"), tip = $("tip");
+  function hideTip() {
+    tip.style.display = "none";
+    const hv = $("hover");
+    if (hv) hv.setAttribute("visibility", "hidden");
+    svg.querySelectorAll(".dot").forEach(d => d.setAttribute("visibility", "hidden"));
+  }
   svg.addEventListener("mousemove", e => {
-    if (rows.length < 2) return;
+    if (!series.length) return;
     const rect = svg.getBoundingClientRect();
     const sx = (e.clientX - rect.left) * (W / rect.width);
-    const years = rows.length - 1;
+    const years = maxYears();
     const yr = Math.round(((sx - P.l) / (W - P.l - P.r)) * years);
-    if (yr < 0 || yr > years) { svg.dispatchEvent(new Event("mouseleave")); return; }
-    const r = rows[yr], px = svg._x(yr), py = svg._y(r.total);
-    const hv = $("hover"), dot = $("dot");
+    if (yr < 0 || yr > years) return hideTip();
+    const px = svg._x(yr);
+    const hv = $("hover");
     hv.setAttribute("x1", px); hv.setAttribute("x2", px); hv.setAttribute("visibility", "visible");
-    dot.setAttribute("cx", px); dot.setAttribute("cy", py); dot.setAttribute("visibility", "visible");
-    tip.innerHTML = `<b>Jahr ${yr}</b>Depotwert: ${eur.format(r.total)}<br>Eingezahlt: ${eur.format(r.paid)}<br>Gewinn: ${eur.format(r.total - r.paid)}`;
+
+    let topY = H;
+    series.forEach(({ id, rows }) => {
+      const dot = svg.querySelector(`.dot[data-id="${id}"]`);
+      const r = rows[yr];
+      if (!r) { dot.setAttribute("visibility", "hidden"); return; }
+      const py = svg._y(r.total);
+      topY = Math.min(topY, py);
+      dot.setAttribute("cx", px); dot.setAttribute("cy", py); dot.setAttribute("visibility", "visible");
+    });
+
+    if (!isCompare()) {
+      const r = series[0].rows[yr];
+      tip.innerHTML = `<b>Jahr ${yr}</b>Depotwert: ${eur.format(r.total)}<br>Eingezahlt: ${eur.format(r.paid)}<br>Gewinn: ${eur.format(r.total - r.paid)}`;
+    } else {
+      const grp = ({ id, rows }) => {
+        const r = rows[yr];
+        return `<div class="grp" style="--c:var(${PLANS[id].color})"><i>${PLANS[id].name}</i><br>` +
+          (r ? `Depotwert: ${eur.format(r.total)}<br>Eingezahlt: ${eur.format(r.paid)}` : "Laufzeit bereits beendet") + `</div>`;
+      };
+      const [a, b] = series.map(s => s.rows[yr]);
+      const diff = a && b ? `<div class="grp">Differenz: <span class="${signCls(b.total - a.total)}">${eurSigned(b.total - a.total)}</span></div>` : "";
+      tip.innerHTML = `<b>Jahr ${yr}</b>${series.map(grp).join("")}${diff}`;
+    }
     tip.style.display = "block";
     const left = px * rect.width / W;
     const tw = tip.offsetWidth;
     tip.style.left = Math.min(Math.max(left - tw / 2, 0), rect.width - tw) + "px";
-    tip.style.top = Math.max(py * rect.height / H - tip.offsetHeight - 12, 0) + "px";
+    tip.style.top = Math.max(topY * rect.height / H - tip.offsetHeight - 12, 0) + "px";
   });
-  svg.addEventListener("mouseleave", () => {
-    tip.style.display = "none";
-    const hv = $("hover"), dot = $("dot");
-    if (hv) hv.setAttribute("visibility", "hidden");
-    if (dot) dot.setAttribute("visibility", "hidden");
-  });
+  svg.addEventListener("mouseleave", hideTip);
 
-  ["start", "rate", "years", "ret"].forEach(id => $(id).addEventListener("input", calc));
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => rows.length && draw());
+  // ---------- Start ----------
+  renderPlanInputs("a");
+  renderPlanInputs("b");
+  $("compare").addEventListener("change", toggleCompare);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => series.length && draw());
   calc();
 </script>
 </body>
