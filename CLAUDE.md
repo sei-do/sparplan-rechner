@@ -26,6 +26,10 @@ Am Handy arbeitet Claude in der Cloud direkt auf GitHub; dort entstehen Änderun
 
 Sparplan-Rechner als **eine einzige Datei `index.html`** (HTML + CSS + JavaScript inline). Kein Build, keine Abhängigkeiten, keine Tests. Die Seite muss **ohne Internet** funktionieren: keine CDNs, externen Schriften oder Bibliotheken einbinden – das Diagramm ist handgeschriebenes SVG.
 
+Online über GitHub Pages (Branch `main`, Ordner `/`); jeder Push auf `main` geht damit live. Das Repository ist öffentlich.
+
+Eine Content-Security-Policy im `<head>` verbietet jedes Nachladen und Senden (`default-src 'none'`). Externe Ressourcen, `fetch` oder Formulare funktionieren deshalb bewusst nicht – die Policy nicht lockern.
+
 Starten: `index.html` im Browser öffnen. Für Tests im eingebauten Browser einen lokalen Static-Server nutzen (`.claude/launch.json` ist lokal und per `.git/info/exclude` nicht versioniert).
 
 ## Aufbau von `index.html`

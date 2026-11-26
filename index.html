@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Sicherheit: Die Seite darf nichts von außen laden oder irgendwohin senden. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Sparplan-Rechner: Endbetrag, Einzahlungen und Gewinn eines monatlichen Sparplans berechnen und zwei Pläne vergleichen.">
 <title>Sparplan-Rechner</title>
 <style>
   :root {
