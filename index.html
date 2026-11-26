@@ -232,7 +232,7 @@
   const eurShort = v => {
     const a = Math.abs(v);
     if (a >= 1e6) return (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " Mio. €";
-    if (a >= 1e3) return (v / 1e3).toLocaleString("de-DE", { maximumFractionDigits: 0 }) + " Tsd. €";
+    if (a >= 1e3) return (v / 1e3).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " Tsd. €";
     return Math.round(v) + " €";
   };
 
@@ -335,15 +335,26 @@
   function draw() {
     const svg = $("chart");
     const years = maxYears();
-    const max = niceMax(Math.max(...series.flatMap(s => s.rows.map(r => Math.max(r.total, r.paid)))));
+    // Y-Achse beginnt beim (kleinsten) Startkapital, nicht bei 0 €.
+    // Fällt ein Depotwert darunter (negative Rendite), beginnt sie wieder bei 0 €.
+    const all = series.flatMap(s => s.rows.flatMap(r => [r.total, r.paid]));
+    const top = Math.max(...all);
+    let lo = Math.min(...series.map(s => s.rows[0].total));
+    if (Math.min(...all) < lo || lo >= top) lo = 0;
+    // Runde Schrittweite mit 4 oder 5 Abschnitten wählen, je nachdem, was weniger Leerraum lässt
+    const [tick, ticks] = [4, 5].map(n => {
+      const t = niceMax((top - lo) / n);
+      return [t, Math.max(1, Math.ceil((top - lo) / t - 1e-9))];
+    }).reduce((best, c) => c[0] * c[1] < best[0] * best[1] ? c : best);
+    const max = lo + ticks * tick;
     const x = y => P.l + (y / years) * (W - P.l - P.r);
-    const yy = v => H - P.b - (v / max) * (H - P.t - P.b);
+    const yy = v => H - P.b - ((v - lo) / (max - lo)) * (H - P.t - P.b);
     const css = getComputedStyle(document.documentElement);
     const c = n => css.getPropertyValue(n).trim();
 
     let s = "";
-    for (let i = 0; i <= 4; i++) {
-      const v = max * i / 4, py = yy(v);
+    for (let i = 0; i <= ticks; i++) {
+      const v = lo + tick * i, py = yy(v);
       s += `<line x1="${P.l}" x2="${W - P.r}" y1="${py}" y2="${py}" stroke="${c("--line")}" />`;
       s += `<text x="${P.l - 10}" y="${py + 4}" text-anchor="end">${eurShort(v)}</text>`;
     }
@@ -355,7 +366,7 @@
 
     // Fläche nur unter Plan A
     const A = series[0].rows;
-    s += `<path d="${path(A, "total")}L${x(A.length - 1)},${yy(0)}L${x(0)},${yy(0)}Z" fill="${c("--accent-soft")}" />`;
+    s += `<path d="${path(A, "total")}L${x(A.length - 1)},${yy(lo)}L${x(0)},${yy(lo)}Z" fill="${c("--accent-soft")}" />`;
 
     series.forEach(({ id, rows }) => {
       const col = c(PLANS[id].color);
