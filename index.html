@@ -8,8 +8,13 @@
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="Sparplan-Rechner: Endbetrag, Einzahlungen und Gewinn eines monatlichen Sparplans berechnen und zwei Pläne vergleichen.">
 <title>Sparplan-Rechner</title>
+<script>
+  // Gespeicherte Design-Wahl vor dem Zeichnen setzen, damit die Seite nicht hell aufblitzt.
+  try { const t = localStorage.getItem("theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 <style>
   :root {
+    color-scheme: light;
     --bg: #f5f6f8;
     --card: #ffffff;
     --text: #1d2330;
@@ -23,8 +28,10 @@
     --gain: #16a34a;
     --neg: #dc2626;
   }
+  /* Dunkel: nach System, außer der Nutzer hat per Schalter „hell“ gewählt */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
       --bg: #111318;
       --card: #1a1d24;
       --text: #e8eaee;
@@ -39,6 +46,22 @@
       --neg: #f87171;
     }
   }
+  /* Dunkel per Schalter gewählt */
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #111318;
+    --card: #1a1d24;
+    --text: #e8eaee;
+    --muted: #9aa1ad;
+    --line: #2c313b;
+    --accent: #60a5fa;
+    --accent-soft: rgba(96, 165, 250, 0.15);
+    --b: #fb923c;
+    --b-soft: rgba(251, 146, 60, 0.15);
+    --paid: #6b7280;
+    --gain: #4ade80;
+    --neg: #f87171;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -48,7 +71,8 @@
     line-height: 1.5;
   }
   main { max-width: 880px; margin: 0 auto; padding: 40px 20px 60px; }
-  h1 { font-size: 1.75rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  h1 { font-size: 1.75rem; margin: 0; letter-spacing: -0.01em; }
   .sub { color: var(--muted); margin: 0 0 28px; }
   .card {
     background: var(--card);
@@ -158,7 +182,10 @@
 </head>
 <body>
 <main>
-  <h1>Sparplan-Rechner</h1>
+  <div class="head">
+    <h1>Sparplan-Rechner</h1>
+    <label class="switch"><input type="checkbox" id="theme"><span class="track"></span>Dunkles Design</label>
+  </div>
   <p class="sub">Wie viel wird aus deiner monatlichen Sparrate?</p>
 
   <section class="card">
@@ -452,7 +479,20 @@
   renderPlanInputs("a");
   renderPlanInputs("b");
   $("compare").addEventListener("change", toggleCompare);
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => series.length && draw());
+  // Dark-Mode-Schalter: ohne eigene Wahl folgt die Seite dem System.
+  const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const syncThemeSwitch = () => {
+    const t = document.documentElement.dataset.theme;
+    $("theme").checked = t ? t === "dark" : darkQuery.matches;
+  };
+  $("theme").addEventListener("change", () => {
+    const t = $("theme").checked ? "dark" : "light";
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem("theme", t); } catch (e) {}
+    if (series.length) draw();
+  });
+  darkQuery.addEventListener("change", () => { syncThemeSwitch(); if (series.length) draw(); });
+  syncThemeSwitch();
   calc();
 </script>
 </body>
