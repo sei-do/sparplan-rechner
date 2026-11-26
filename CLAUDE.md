@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Alle Texte auf Deutsch**: Oberfläche, Kommentare, Commit-Nachrichten und Antworten an den Nutzer.
 - **Beträge immer im deutschen Format**: `1.234,56 €` (Punkt als Tausendertrenner, Komma als Dezimaltrenner, Leerzeichen vor `€`). Formatierung über `Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" })`.
+  - Ausnahme, vom Nutzer so entschieden: **Im Rechner werden Beträge ohne Cent angezeigt** (`91.129 €`, Formatter `eur` mit `maximumFractionDigits: 0`). Nicht auf Cent umstellen. Die Diagrammachse nutzt Kurzform (`75 Tsd. €`).
 - **Nach jeder fertigen Änderung einen Git-Commit machen** – mit einer kurzen deutschen Commit-Nachricht, die beschreibt, was sich für den Nutzer ändert.
 
 ## Projekt
@@ -25,4 +26,4 @@ Starten: `index.html` im Browser öffnen. Für Tests im eingebauten Browser eine
 
 ## Prüfen
 
-Kontrollwert für die Berechnung: 0 € Startkapital, 200 €/Monat, 20 Jahre, 6 % → Endbetrag rund **91.129 €**, eingezahlt 48.000,00 €. Änderungen im Browser in heller und dunkler Darstellung sowie in Handy-Breite (375 px, kein seitlicher Überlauf) prüfen.
+Kontrollwert für die Berechnung: 0 € Startkapital, 200 €/Monat, 20 Jahre, 6 % → Endbetrag **91.129 €**, eingezahlt 48.000 €. Änderungen im Browser in heller und dunkler Darstellung sowie in Handy-Breite (375 px, kein seitlicher Überlauf) prüfen.
